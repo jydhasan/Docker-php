@@ -179,9 +179,199 @@ docker run -d -p 8080:80 --name php-dev -v ${PWD}:/var/www/html php-hello
 
 ---
 
-চাইলে আমি তোমার জন্য:
-👉 Laravel Docker setup
-👉 PHP + MySQL full stack Docker Compose
-👉 Auto reload development environment
+চলুন আমি আপনাকে একটা **complete PHP + MySQL full stack Docker Compose project** দেই — যেটা আপনি GitHub এ রাখতে পারবেন এবং real project হিসেবে use করতে পারবেন 🔥
 
-সব বানিয়ে দিতে পারি 🔥
+---
+
+# 🐘 PHP + 🐬 MySQL Full Stack (Docker Compose)
+
+---
+
+# 📁 Project Structure
+
+```
+project-folder/
+│
+├── docker-compose.yml
+├── Dockerfile
+├── index.php
+└── db.php
+```
+
+---
+
+# 🐳 1. docker-compose.yml
+
+```yaml
+version: "3.8"
+
+services:
+  php:
+    build: .
+    container_name: php_app
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: testdb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user123
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
+```
+
+---
+
+# 🐘 2. Dockerfile (PHP Apache)
+
+```Dockerfile
+FROM php:8.2-apache
+
+RUN docker-php-ext-install mysqli pdo pdo_mysql
+
+COPY . /var/www/html/
+
+EXPOSE 80
+```
+
+---
+
+# 🌐 3. index.php (Test Page)
+
+```php
+<?php
+echo "PHP is working! <br>";
+
+// DB connection test
+$conn = new mysqli("db", "user", "user123", "testdb");
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+echo "Connected to MySQL successfully!";
+?>
+```
+
+---
+
+# 🔌 4. db.php (Optional reusable connection)
+
+```php
+<?php
+$conn = new mysqli("db", "user", "user123", "testdb");
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+?>
+```
+
+---
+
+# 🚀 5. Run Commands
+
+## 🟢 Step 1: Build & Start
+
+```bash
+docker-compose up -d --build
+```
+
+---
+
+## 🟢 Step 2: Check Running Containers
+
+```bash
+docker ps
+```
+
+---
+
+## 🟢 Step 3: Open Browser
+
+```
+http://localhost:8080
+```
+
+---
+
+## 🟢 Step 4: Stop Everything
+
+```bash
+docker-compose down
+```
+
+---
+
+## 🟢 Step 5: Stop + Remove DB Data
+
+```bash
+docker-compose down -v
+```
+
+---
+
+# 🧠 How it works
+
+| Service         | কাজ                              |
+| --------------- | -------------------------------- |
+| PHP container   | Web server (Apache + PHP)        |
+| MySQL container | Database                         |
+| docker-compose  | দুইটা service একসাথে connect করে |
+
+---
+
+# 🔥 Important Tips
+
+### ✔️ DB host name
+
+```php
+"db"
+```
+
+👉 কারণ docker-compose service name = db
+
+---
+
+### ✔️ Auto reload (development)
+
+```yaml
+volumes:
+  - .:/var/www/html
+```
+
+---
+
+# 🎯 Result
+
+* PHP runs on: `http://localhost:8080`
+* MySQL runs internally on Docker network
+* Full stack ready for development
+
+---
+
+# 🚀 Bonus (Next Level)
+
+চাইলে আমি আপনাকে next step শিখাতে পারি:
+
+👉 PHP CRUD with MySQL (Create, Read, Update, Delete)
+👉 phpMyAdmin add করা
+👉 Laravel + MySQL Docker setup
+👉 Production-ready Docker setup (Nginx + PHP-FPM)
+
+বললেই next level project বানিয়ে দিব 🔥
+
